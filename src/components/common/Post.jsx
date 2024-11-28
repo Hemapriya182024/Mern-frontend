@@ -5,19 +5,46 @@ import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { baseurl } from "../../App";
+import toast from 'react-hot-toast'
 
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
+	const {data:authUser}=useQuery({queryKey:['authUser']})
+		const queryClient=useQueryClient()
+	// console.log(authUser)
+	// console.log("authUser._id ",authUser._id)
+	// console.log("post.user._id ",post.user._id )
+	const{mutate:deletePost,isPending:isDeleting}=useMutation(
+		{
+			mutationFn:async()=>{
+				const res=await axios.delete(`${baseurl}/api/posts/${post._id}`,{withCredentials:true})
+				return res
+			},
+			onSuccess:()=>{
+				toast.success("Post deleted sucessfully")
+				queryClient.invalidateQueries({queryKey:["posts"]})
+
+			}
+		}
+		
+	)
+	const isMyPost = authUser._id === post.user._id ;
 	const postOwner = post.user;
 	const isLiked = false;
 
-	const isMyPost = true;
+
+	
 
 	const formattedDate = "1h";
 
 	const isCommenting = false;
 
-	const handleDeletePost = () => {};
+	const handleDeletePost = () => {
+		deletePost()
+	};
 
 	const handlePostComment = (e) => {
 		e.preventDefault();

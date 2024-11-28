@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import XSvg from '../../components/svgs/X';
 import { MdPassword } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";  
 import { baseurl } from "../../App";
 import toast from 'react-hot-toast';
@@ -14,22 +14,26 @@ const LoginPage = () => {
     username: "",
     password: "",
   });
+  const queryClient=useQueryClient()
 
   const navigate = useNavigate();  
 
   const { mutate, isPending, isError, error } = useMutation({
     mutationFn: async ({ username, password }) => {
-      console.log(username,password)
-      const res = await axios.post(`${baseurl}/api/auth/login`, { username, password } );
+      // console.log(username,password)
+      const res = await axios.post(`${baseurl}/api/auth/login`, { username, password }, { withCredentials: true });
       return res.data;
     },
     onSuccess: (data) => {
       // Log the response data to ensure login success
-      console.log(data);
+     
       
       // Show success toast
       toast.success("Login successful!");
-      navigate("/");  
+      queryClient.invalidateQueries({
+        querykey:["authUser "]
+      })
+      // navigate("/");  
     },
     onError: (error) => {
       // Log the error for debugging purposes
@@ -106,4 +110,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

@@ -1,78 +1,70 @@
-import React from 'react'
-import LoginPage from './Pages/Auth/LoginPage'
-import SignUpPage from './Pages/Auth/SignUpPage'
-import HomePage from './Pages/Home/HomePage'
-import { Route ,Routes } from 'react-router-dom'
-import Sidebar from './components/common/Sidebar'
-import RightPanel from './components/common/RightPanel'
-import NotificationPage from './Pages/notification/NotificationPage'
-import ProfilePage from './Pages/profile/ProfilePage'
-import { Toaster } from 'react-hot-toast';
-import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
-import LoadingSpinner from './components/common/LoadingSpinner'
 
-export const baseurl="http://localhost:4000"
+import React from 'react';
+import LoginPage from './Pages/Auth/LoginPage';
+import SignUpPage from './Pages/Auth/SignUpPage';
+import HomePage from './Pages/Home/HomePage';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import Sidebar from './components/common/Sidebar';
+import RightPanel from './components/common/RightPanel';
+import NotificationPage from './Pages/notification/NotificationPage';
+import ProfilePage from './Pages/profile/ProfilePage';
+import { Toaster } from 'react-hot-toast';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import LoadingSpinner from './components/common/LoadingSpinner';
+
+export const baseurl = "http://localhost:4000";
 
 const App = () => {
-  const { data:authUser, isLoading, isError, error } = useQuery({
+  const { data: authUser, isLoading, isError, error } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
       try {
-        const token = localStorage.getItem("token")
-        console.log("token", token)
-
-        if (!token) {
-          throw new Error("No token found. Please log in again.")
-        }
-
-        const res = await axios.get(`${baseurl}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-
-        if (res.status !== 200) {
-          throw new Error("Failed to fetch user. Please try again.")
-        }
-
-        return res.data // Return the response data
-      } catch (error) {
-        console.error(error)
-        throw new Error(error.response?.data?.message || error.message || "Failed to fetch user.")
+        const res = await axios.get(`${baseurl}/api/auth/me`, { withCredentials: true });
+        console.log("API Response:", res); // Log the full API response
+        return res.data;
+      } catch (err) {
+        console.error("API Error:", err);
+        return null;
       }
     },
-    retry: false, // Disabling retries for failed requests
-  })
-if(isLoading)
-{
-  return (
-    <div className='flex justify-center items-center h-screen'>
-      <LoadingSpinner size='lg' />
-    </div>
+    retry: false,
+  });
 
-  )
-    
-  
-}
+  console.log(authUser);
 
- 
+  if (isLoading) {
+    return (
+      <div className='flex justify-center items-center h-screen'>
+        <LoadingSpinner size='lg' />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
-    <>  
-     <Toaster/>
-    <div className='flex max-w-6xl mx-auto'>
-   
-      <Sidebar />
-      <Routes>
-        <Route path='/' element={<HomePage />} />
-        <Route path='/login' element={<LoginPage />} />
-        <Route path='/signup' element={<SignUpPage />} />
-        <Route path='/notifications' element={<NotificationPage />} />
-        <Route path='/profile/:username' element={<ProfilePage />} />
-      </Routes>
-      <RightPanel />
-      </div>  
+    <>
+      <Toaster />
+      <div className='flex max-w-6xl mx-auto'>
+        {/* Only render Sidebar and RightPanel if authUser exists */}
+        {authUser && <Sidebar />}
+        
+        <Routes>
+          <Route path='/' element={authUser ? <HomePage /> : <Navigate to='/login' />} />
+          <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to='/' />} />
+          <Route path='/signup' element={!authUser ? <SignUpPage /> : <Navigate to='/' />} />
+          <Route path='/notifications' element={authUser ? <NotificationPage /> : <Navigate to='/login' />} />
+          <Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to='/login' />} />
+        </Routes>
+
+        {/* Only render RightPanel if authUser exists */}
+        {authUser && <RightPanel />}
+      </div>
     </>
-  
-  )
-}
+  );
+};
 
-export default App
+export default App;

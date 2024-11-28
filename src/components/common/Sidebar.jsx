@@ -4,65 +4,74 @@ import { BsBriefcase, BsChatDots } from "react-icons/bs";
 import { IoNotifications } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
 import { BiLogOut, BiCog } from "react-icons/bi";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import toast from "react-hot-toast"; // Import toast for notifications
 import { baseurl } from "../../App";
 
 const Sidebar = () => {
   const navigate = useNavigate(); // To navigate after logout
-  const data = {
-    fullName: "John Doe",
-    username: "johndoe",
-    profileImg: "/avatars/boy1.png",
-    tagline: "MERN Developer | Open to Opportunities",
-  };
+  const queryClient = useQueryClient(); // Query client for invalidation
 
   // Mutation for logout
   const { mutate: logout } = useMutation({
-		mutationFn: async () => {
-			try {
-				// Using Axios for the API call
-        localStorage.removeItem("jwtToken");
-				const { data } = await axios.post(`${baseurl}/api/auth/logout`);
-				return data; // Axios response data
-			} catch (error) {
-				// Handle Axios errors
-				const message = error.response?.data?.error || "Something went wrong";
-				throw new Error(message);
-			}
-		},
-		onSuccess: () => {
-			// Invalidate queries to refresh the auth user state
-		
-			toast.success("Logout successful!");
-		},
-		onError: (error) => {
-			// Show error toast message
-			toast.error(error.message || "Logout failed");
-		},
-	});
+    mutationFn: async () => {
+      try {
+        // Using Axios for the API call
+        const { data } = await axios.post(`${baseurl}/api/auth/logout`, {}, { withCredentials: true });
+        console.log(data);
+        return data; // Axios response data
+      } catch (error) {
+        // Handle Axios errors
+        const message = error.response?.data?.error || "Something went wrong";
+        throw new Error(message);
+      }
+    },
+    onSuccess: () => {
+      // Invalidate queries to refresh the auth user state
+      toast.success("Logout successful!");
+      queryClient.invalidateQueries({ queryKey: ['authUser'] }); // Invalidating the query by array key
+      navigate("/login"); // Navigate to login page after logout
+    },
+    onError: (error) => {
+      // Show error toast message
+      toast.error(error.message || "Logout failed");
+    },
+  });
+
+  const { data: authUser } = useQuery({
+    queryKey: ['authUser'],
+  });
+  console.log(authUser);
+  console.log(authUser.fullname)
 
   return (
     <div className="w-20 md:w-64 bg-gray-100 h-screen flex flex-col shadow-md">
       {/* Profile Section */}
-      {data && (
-        <div className="flex flex-col items-center md:items-start p-4 border-b border-gray-300">
-          <Link to={`/profile/${data.username}`}>
-            <div className="avatar w-16 h-16 mb-2">
-              <img
-                className="rounded-full"
-                src={data.profileImg || "/avatar-placeholder.png"}
-                alt="Profile"
-              />
+      <div className="flex flex-col items-center md:items-start p-4 border-b border-gray-300">
+        {authUser ? (
+          <>
+            <Link to={`/profile/${authUser.username}`}>
+              <div className="avatar w-16 h-16 mb-2">
+                <img
+                  className="rounded-full"
+                  src={authUser.profileImg || "/avatar-placeholder.png"} // Default to placeholder if profileImg is empty
+                  alt="Profile"
+                />
+              </div>
+            </Link>
+            <div className="hidden md:block">
+              <p className="text-gray-900 font-bold">{authUser.fullname || "User"}</p>
+              <p className="text-gray-600 text-sm">Open to Opportunities</p>
             </div>
-          </Link>
-          <div className="hidden md:block">
-            <p className="text-gray-900 font-bold">{data.fullName}</p>
-            <p className="text-gray-600 text-sm">{data.tagline}</p>
-          </div>
-        </div>
-      )}
+          </>
+        ) : (
+          <div>Loading...</div> // Show a loading state or fallback if authUser is not available
+        )}
+      </div>
+
+
+
 
       {/* Navigation Links */}
       <ul className="flex flex-col mt-4 space-y-3">
@@ -127,11 +136,10 @@ const Sidebar = () => {
           </li>
           <li>
             <button
-              onClick={() => logout()} // This triggers the logout function when clicked
+              onClick={(e) => { e.preventDefault(); logout(); }} // Trigger logout when clicked
               className="flex items-center gap-3 p-3 w-full hover:bg-gray-200 transition rounded-md"
             >
-              <BiLogOut className="w-6 h-6 text-gray-700" onClick={(e)=>{ e.preventDefault();
-                logout();}} />
+              <BiLogOut className="w-6 h-6 text-gray-700" />
               <span className="hidden md:inline text-gray-800">Logout</span>
             </button>
           </li>
