@@ -55,7 +55,7 @@ const Sidebar = () => {
               <div className="avatar w-16 h-16 mb-2">
                 <img
                   className="rounded-full"
-                  src={authUser.profileImg || "/avatar-placeholder.png"} // Default to placeholder if profileImg is empty
+                  src={authUser.profileImg || "/profile.jpeg"} // Default to placeholder if profileImg is empty
                   alt="Profile"
                 />
               </div>

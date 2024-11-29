@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { baseurl } from "../../App";
 import toast from 'react-hot-toast'
+import {formatPostDate} from '../../utils/data/index'
 
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
@@ -31,16 +32,91 @@ const Post = ({ post }) => {
 		}
 		
 	)
+	const { mutate: likePost, isPending: isLiking } = useMutation({
+		mutationFn: async () => {
+		  try {
+			const res = await axios.post(
+			  `${baseurl}/api/posts/like/${post._id}`,
+			  {},
+			  { withCredentials: true } // Correct placement of `withCredentials`
+			);
+	  
+			if (!res.data) {
+			  throw new Error(res.error || "Something went wrong!!");
+			}
+	  
+			console.log(res.data);
+			return res.data;
+		  } catch (error) {
+			throw new Error(error.message || "An unexpected error occurred"); // Provide meaningful error messages
+		  }
+		},
+		onSuccess: () => {
+		  toast.success("Post liked");
+		  queryClient.invalidateQueries({ queryKey: ["posts"] });
+		},
+		// onSuccess: (updatedLikes) => {
+		// 	toast.success("Post liked");
+		  
+		// 	queryClient.setQueryData(["posts"], (oldData) => {
+		// 	  // Ensure `oldData` is valid
+		// 	  if (!oldData || !Array.isArray(oldData)) return oldData;
+		  
+		// 	  return oldData.map((p) => {
+		// 		if (p._id === post._id) { // Use `post._id` for comparison
+		// 		  return { ...p, likes: updatedLikes }; // Update likes
+		// 		}
+		// 		return p; // Return other posts unchanged
+		// 	  });
+		// 	});
+		//   },
+		  
+		onError: (error) => { // Correctly receive the `error` object
+		  toast.error(error.message || "Failed to like the post");
+		},
+	  });
+	
+	  const { mutate: commentPost, isPending: isCommenting } = useMutation({
+		mutationFn: async () => {
+		  try {
+			const res = await axios.post(
+			  `${baseurl}/api/posts/comment/${post._id}`,
+			  { text: comment },
+			  { withCredentials: true }
+			);
+	  
+			// Check for a successful response
+			if (res.status !== 200) {
+			  throw new Error("Failed to post the comment!");
+			}
+	  
+			console.log(res.data);
+			return res.data; // Return the response data if successful
+		  } catch (error) {
+			throw error.response?.data?.message || error.message || "Something went wrong!";
+		  }
+		},
+		onSuccess: () => {
+		  toast.success("Comment added successfully!");
+		  setComment(""); // Clear the comment input field
+		  queryClient.invalidateQueries({ queryKey: ["posts"] }); // Refresh posts query
+		},
+		onError: (error) => {
+		  toast.error(error); // Show a meaningful error message
+		},
+	  });
+	  
+
 	const isMyPost = authUser._id === post.user._id ;
 	const postOwner = post.user;
-	const isLiked = false;
+	 const isLiked = post.likes.includes(authUser._id);
 
 
 	
 
-	const formattedDate = "1h";
+	const formattedDate = formatPostDate(post.createdAt)
 
-	const isCommenting = false;
+	// const isCommenting = true;
 
 	const handleDeletePost = () => {
 		deletePost()
@@ -48,16 +124,25 @@ const Post = ({ post }) => {
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
+		if(isCommenting) return
+		commentPost()
 	};
 
-	const handleLikePost = () => {};
+	const handleLikePost = () => {
+		if(isLiking) return;
+		
+			likePost()
+
+		
+		
+	};
 
 	return (
 		<>
 			<div className='flex gap-2 items-start p-4 border-b border-gray-700'>
 				<div className='avatar'>
 					<Link to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden'>
-						<img src={postOwner.profileImg || "/avatar-placeholder.png"} />
+						<img src={postOwner.profileImg || "/profile.jpeg"} />
 					</Link>
 				</div>
 				<div className='flex flex-col flex-1'>
@@ -162,8 +247,8 @@ const Post = ({ post }) => {
 								{isLiked && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
 
 								<span
-									className={`text-sm text-slate-500 group-hover:text-pink-500 ${
-										isLiked ? "text-pink-500" : ""
+									className={`text-sm group-hover:text-pink-500 ${
+										isLiked ? "text-pink-500" : "text-slate-500"
 									}`}
 								>
 									{post.likes.length}
