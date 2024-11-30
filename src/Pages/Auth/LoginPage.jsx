@@ -33,7 +33,7 @@ const LoginPage = () => {
       queryClient.invalidateQueries({
         querykey:["authUser "]
       })
-      // navigate("/");  
+     navigate("/");  
     },
     onError: (error) => {
       // Log the error for debugging purposes
