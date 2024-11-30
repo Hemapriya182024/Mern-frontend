@@ -31,6 +31,7 @@ const ProfilePage = () => {
   const { username } = useParams();
   const{data:authUser}=useQuery({queryKey:["authUser"]})
   const queryClient=useQueryClient()
+  const {follow,isPending}=useFollow()
  
 
   const {
@@ -64,45 +65,35 @@ const ProfilePage = () => {
     }
   }, [username, refetch]);
 
-  const {mutate:updateProfile,isPending:isUpdatingProfile}=useMutation(
-    {
-      mutationFn:async()=>{
-        try {
-          const res=await axios.post(`${baseurl}/api/users/update`,{coverImg,profileImg},{withCredentials:true})
-          if(!res.ok)
-          {
-            throw new Error(res.error || "something went wrong ")
-          }
-          return res.data
-          
-        } catch (error) {
-          throw error
+  const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await axios.post(
+          `${baseurl}/api/users/update`,
+          { coverImg, profileImg },
+          { withCredentials: true }
+        );
+        if (res.status !== 200) {
+          throw new Error(res.statusText || "Something went wrong");
         }
-      },
-      onSuccess:()=>{
-        toast.success("Profile updated")
-        Promise.all([
-          queryClient.invalidateQueries(
-            {
-              queryKey:["authUser"]
-            }
-          ),
-          queryClient.invalidateQueries(
-            {
-              queryKey:["userProfile"]
-            }
-          )
-
-        ])
-
-      },
-      onError:()=>{
-        toast.error("Failed to update")
+        return res.data;
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        throw error;
       }
-
-    }
-  )
-
+    },
+    onSuccess: () => {
+      toast.success("Profile updated");
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+        queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+      ]);
+    },
+    onError: () => {
+      toast.error("Failed to update profile");
+    },
+  });
+  
   const memberSinceData=formatMemberSinceDate(user?.createdAt)
   const amIFollowing=authUser?.following.includes(user?._id)
 
@@ -112,13 +103,14 @@ const ProfilePage = () => {
       const reader = new FileReader();
       reader.onload = () => {
         if (state === "coverImg") setCoverImg(reader.result);
+        console.log("Cover Image Set:", reader.result); 
         if (state === "profileImg") setProfileImg(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
   const isMyProfile = authUser?._id === user?._id; 
-  const {follow,isPending}=useFollow()
+ 
 
   return (
     <div className="flex-[4_4_0] border-r border-gray-700 min-h-screen">
@@ -141,7 +133,7 @@ const ProfilePage = () => {
           {/* COVER IMG */}
           <div className="relative group/cover">
             <img
-              src={coverImg || user?.coverImg || ""}
+              src={coverImg || user?.coverImg || "/coverImg.jpg"}
               className="h-52 w-full object-cover"
               alt="cover"
             />
@@ -186,20 +178,20 @@ const ProfilePage = () => {
           <div className="flex justify-end px-4 mt-5">
             {isMyProfile && <EditProfileModal />}
             {!isMyProfile && (
-              <button
-              className="btn btn-outline rounded-full btn-sm"
-              onClick={() => {
-                // Perform follow/unfollow action
-                follow(user?._id); 
-              }}
-            >
-              {isPending ? (
-                <LoadingSpinner size="sm" />
-              ) : (
-                amIFollowing ? "Unfollow" : "Follow"
-              )}
-            </button>
-            
+               <button
+               className="btn btn-outline rounded-full btn-sm"
+               onClick={() => follow(user?._id)} // Perform follow/unfollow action
+               disabled={isPending || amIFollowing} // Disable the button if following or request is pending
+             >
+               {isPending ? (
+                 <LoadingSpinner size="sm" />
+               ) : (
+                 amIFollowing ? "Following" : "Follow" // Toggle text based on follow status
+               )}
+             </button>
+             
+             
+             
             )}
             {(coverImg || profileImg) && (
               <button

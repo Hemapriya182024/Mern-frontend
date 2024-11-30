@@ -60,12 +60,12 @@ const LoginPage = () => {
   return (
     <div className="max-w-screen-xl mx-auto flex h-screen">
       <div className="flex-1 hidden lg:flex items-center justify-center">
-        <XSvg className="lg:w-2/3 fill-white" />
+        <img src='https://i.pinimg.com/736x/a6/fc/8c/a6fc8ce5fe45cde6d71078f30a525b00.jpg' className="lg:w-2/3 " />
       </div>
       <div className="flex-1 flex flex-col justify-center items-center">
         <form className="flex gap-4 flex-col" onSubmit={handleSubmit}>
-          <XSvg className="w-24 lg:hidden fill-white" />
-          <h1 className="text-4xl font-extrabold text-white">{"Let's"} go.</h1>
+          <img src='https://i.pinimg.com/736x/a6/fc/8c/a6fc8ce5fe45cde6d71078f30a525b00.jpg' className="w-24 lg:hidden" />
+          <h1 className="text-4xl font-extrabold">{"Let's"} go.</h1>
           
           <label className="input input-bordered rounded flex items-center gap-2">
             <FaUser  />
@@ -91,15 +91,15 @@ const LoginPage = () => {
             />
           </label>
           
-          <button className="btn rounded-full btn-primary text-white" disabled={isPending}>
+          <button className="btn rounded-full btn-primary" disabled={isPending}>
             {isPending ? <LoadingSpinner /> : "Login"}
           </button>
         </form>
         
         <div className="flex flex-col gap-2 mt-4">
-          <p className="text-white text-lg">{"Don't"} have an account?</p>
+          <p className=" text-lg">{"Don't"} have an account?</p>
           <Link to="/signup">
-            <button className="btn rounded-full btn-primary text-white btn-outline w-full">
+            <button className="btn rounded-full btn-primary btn-outline w-full">
               Sign up
             </button>
           </Link>
