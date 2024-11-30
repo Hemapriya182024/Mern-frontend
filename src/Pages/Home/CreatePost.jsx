@@ -21,7 +21,7 @@ const CreatePost = () => {
     mutationFn: async ({ text, img }) => {
       try {
         const res = await axios.post(
-          `http://localhost:4000/api/posts/create`,
+          `https://backend-5ojg.onrender.com/api/posts/create`,
           { text, img }, // Send the text and img in the request body
           { withCredentials: true }
         );
