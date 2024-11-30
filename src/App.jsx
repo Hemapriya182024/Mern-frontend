@@ -13,7 +13,8 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import Notfound from './Notfound';
-import Jobs from './jobs';
+import Jobs from './Pages/Jobs/Jobs';
+
 
 export const baseurl = "http://localhost:4000";
 
@@ -61,7 +62,7 @@ const App = () => {
           <Route path='/notifications' element={authUser ? <NotificationPage /> : <Navigate to='/login' />} />
           <Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to='/login' />} />
          
-          <Route path='/jobs' element={authUser ? <Jobs />: <Navigate to='/login' /> } />
+          <Route path='/jobs' element={authUser ? <Jobs /> : <Navigate to='/login' /> } />
           <Route path='/network' element={authUser ? <Notfound />: <Navigate to='/login' /> } />
           <Route path='/messaging' element={authUser ? <Notfound />: <Navigate to='/login' /> } />
           <Route path='/settings' element={authUser ? <Notfound />: <Navigate to='/login' /> } />
