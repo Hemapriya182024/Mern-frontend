@@ -16,7 +16,7 @@ import Notfound from './Notfound';
 import Jobs from './Pages/Jobs/Jobs';
 
 
-export const baseurl = "http://localhost:4000";
+export const baseurl = "https://backend-5ojg.onrender.com";
 
 const App = () => {
   const { data: authUser, isLoading, isError, error } = useQuery({
