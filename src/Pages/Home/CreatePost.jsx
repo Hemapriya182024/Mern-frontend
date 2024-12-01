@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { baseurl } from "../../App";
 
 
 import toast from "react-hot-toast";
@@ -21,7 +22,7 @@ const CreatePost = () => {
     mutationFn: async ({ text, img }) => {
       try {
         const res = await axios.post(
-          `https://backend-5ojg.onrender.com/api/posts/create`,
+          `${ baseurl }/api/posts/create`,
           { text, img }, // Send the text and img in the request body
           { withCredentials: true }
         );

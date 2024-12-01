@@ -145,7 +145,7 @@ const SignUpPage = () => {
 
                 {/* Link to Login Page */}
                 <div className="flex flex-col lg:w-2/3 gap-2 mt-4">
-                    <p className="text-white text-lg">Already have an account?</p>
+                    <p className=" text-lg">Already have an account?</p>
                     <Link to="/login">
                         <button className="btn rounded-full btn-primary btn-outline w-full">
                             Sign in
