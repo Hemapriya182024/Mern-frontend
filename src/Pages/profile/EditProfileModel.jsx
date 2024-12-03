@@ -19,11 +19,12 @@ const EditProfileModal = ({ authUser }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);  // Added modal state
 
   const queryClient = useQueryClient();
-  const token = localStorage.getItem('authToken');
+ 
 
   const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
     mutationFn: async () => {
       try {
+        const token = localStorage.getItem('authToken');
         const res = await axios.post(
           `${baseurl}/api/users/update`,
           {

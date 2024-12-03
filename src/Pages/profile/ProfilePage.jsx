@@ -23,7 +23,7 @@ const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
   const [feedType, setFeedType] = useState("posts");
-  const token = localStorage.getItem("authToken");
+  
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
 
@@ -42,6 +42,7 @@ const ProfilePage = () => {
   } = useQuery({
     queryFn: async () => {
       try {
+        const token = localStorage.getItem("authToken");
         const res = await axios.get(`${baseurl}/api/users/profile/${username}`, {
           withCredentials: true, headers: { Authorization: `Bearer ${token}` },
         });
