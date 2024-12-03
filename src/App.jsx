@@ -17,24 +17,23 @@ import Jobs from './Pages/Jobs/Jobs';
 
 
 export const baseurl = "https://backend-5ojg.onrender.com";
-
 const App = () => {
   const { data: authUser, isLoading, isError, error } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
-      try {
-        const res = await axios.get(`${baseurl}/api/auth/me`, { withCredentials: true });
-        console.log("API Response:", res); // Log the full API response
-        return res.data;
-      } catch (err) {
-        console.error("API Error:", err);
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.error("No token found in localStorage");
         return null;
       }
+      const res = await axios.get(`${baseurl}/api/auth/me`, {
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
     },
     retry: false,
   });
-
-  console.log(authUser);
 
   if (isLoading) {
     return (
@@ -45,32 +44,30 @@ const App = () => {
   }
 
   if (isError) {
-    return <div>Error: {error.message}</div>;
+    console.error(error);
+    return (
+      <div className='flex justify-center items-center h-screen'>
+        <p>Error: {error?.message || "Failed to fetch user data."}</p>
+      </div>
+    );
   }
 
   return (
     <>
       <Toaster />
       <div className='flex max-w-6xl mx-auto'>
-        {/* Only render Sidebar and RightPanel if authUser exists */}
         {authUser && <Sidebar />}
-        
         <Routes>
           <Route path='/' element={authUser ? <HomePage /> : <Navigate to='/login' />} />
           <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to='/' />} />
           <Route path='/signup' element={!authUser ? <SignUpPage /> : <Navigate to='/' />} />
           <Route path='/notifications' element={authUser ? <NotificationPage /> : <Navigate to='/login' />} />
           <Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to='/login' />} />
-         
-          <Route path='/jobs' element={authUser ? <Jobs /> : <Navigate to='/login' /> } />
-          <Route path='/network' element={authUser ? <Notfound />: <Navigate to='/login' /> } />
-          <Route path='/messaging' element={authUser ? <Notfound />: <Navigate to='/login' /> } />
-          <Route path='/settings' element={authUser ? <Notfound />: <Navigate to='/login' /> } />
-         
-
+          <Route path='/jobs' element={authUser ? <Jobs /> : <Navigate to='/login' />} />
+          <Route path='/network' element={authUser ? <Notfound /> : <Navigate to='/login' />} />
+          <Route path='/messaging' element={authUser ? <Notfound /> : <Navigate to='/login' />} />
+          <Route path='/settings' element={authUser ? <Notfound /> : <Navigate to='/login' />} />
         </Routes>
-
-        {/* Only render RightPanel if authUser exists */}
         {authUser && <RightPanel />}
       </div>
     </>

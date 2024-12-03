@@ -23,7 +23,7 @@ const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
   const [feedType, setFeedType] = useState("posts");
-
+  const token = localStorage.getItem("authToken");
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
 
@@ -43,7 +43,7 @@ const ProfilePage = () => {
     queryFn: async () => {
       try {
         const res = await axios.get(`${baseurl}/api/users/profile/${username}`, {
-          withCredentials: true,
+          withCredentials: true, headers: { Authorization: `Bearer ${token}` },
         });
         if (res.status !== 200) {
           throw new Error(res.statusText || "Something went wrong");
@@ -67,11 +67,12 @@ const ProfilePage = () => {
 
   const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
     mutationFn: async () => {
+      const token = localStorage.getItem("authToken");
       try {
         const res = await axios.post(
           `${baseurl}/api/users/update`,
           { coverImg, profileImg },
-          { withCredentials: true }
+          { withCredentials: true  ,headers: { Authorization: `Bearer ${token}` }, }
         );
         if (res.status !== 200) {
           throw new Error(res.statusText || "Something went wrong");

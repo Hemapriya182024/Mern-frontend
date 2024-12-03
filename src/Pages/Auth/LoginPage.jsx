@@ -27,7 +27,8 @@ const LoginPage = () => {
     onSuccess: (data) => {
       // Log the response data to ensure login success
      
-      
+      localStorage.setItem("authToken", data.token);
+      console.log(data.token)
       // Show success toast
       toast.success("Login successful!");
       queryClient.invalidateQueries({

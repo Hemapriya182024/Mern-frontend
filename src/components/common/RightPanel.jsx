@@ -10,16 +10,25 @@ const RightPanel = () => {
     const { data: suggestedUsers, isLoading, isError } = useQuery({
         queryKey: ["suggestedUsers"],
         queryFn: async () => {
-            const res = await axios.get(`${baseurl}/api/users/suggested`, { withCredentials: true });
+            const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
+            if (!token) {
+                throw new Error("No token found in localStorage.");
+            }
+
+            const res = await axios.get(`${baseurl}/api/users/suggested`, {
+                withCredentials: true, // Include cookies if needed
+                headers: { Authorization: `Bearer ${token}` }, // Add Bearer token
+            });
             return res.data;
         },
         onError: (error) => {
             console.error("Error fetching suggested users:", error);
         },
-		onSuccess:()=>{
-			
-		}
+        onSuccess: () => {
+            console.log("Suggested users fetched successfully.");
+        },
     });
+
 
     const { follow, isPending } = useFollow();
 

@@ -19,6 +19,7 @@ const EditProfileModal = ({ authUser }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);  // Added modal state
 
   const queryClient = useQueryClient();
+  const token = localStorage.getItem('authToken');
 
   const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
     mutationFn: async () => {
@@ -34,7 +35,7 @@ const EditProfileModal = ({ authUser }) => {
             newPassword: formData.newPassword,
             currentPassword: formData.currentPassword,
           },
-          { withCredentials: true }
+          { withCredentials: true , headers: { Authorization: `Bearer ${token}` }, }
         );
 
         if (res.status !== 200) {

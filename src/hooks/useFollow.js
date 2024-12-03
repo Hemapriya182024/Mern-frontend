@@ -5,9 +5,10 @@ import axios from 'axios'
 
 const useFollow = () => {
     const queryClient = useQueryClient();
+    const token = localStorage.getItem("authToken");
     const { mutate: follow, isLoading: isPending } = useMutation({
         mutationFn: async (userId) => {
-            const res = await axios.post(`${baseurl}/api/users/follow/${userId}`, {}, { withCredentials: true });
+            const res = await axios.post(`${baseurl}/api/users/follow/${userId}`, {}, { withCredentials: true , headers: { Authorization: `Bearer ${token}` } });
             if (!res.data) {
                 throw new Error(res.error || "Something went wrong");
             }

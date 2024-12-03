@@ -17,8 +17,9 @@ const Sidebar = () => {
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
       try {
+        const token = localStorage.getItem('authToken');
         // Using Axios for the API call
-        const { data } = await axios.post(`${baseurl}/api/auth/logout`, {}, { withCredentials: true });
+        const { data } = await axios.post(`${baseurl}/api/auth/logout`, {}, { withCredentials: true , headers: { Authorization: `Bearer ${token}` }});
         console.log(data);
         return data; // Axios response data
       } catch (error) {
@@ -29,6 +30,7 @@ const Sidebar = () => {
     },
     onSuccess: () => {
       // Invalidate queries to refresh the auth user state
+      localStorage.removeItem("authToken")
       toast.success("Logout successful!");
       queryClient.invalidateQueries({ queryKey: ['authUser'] }); // Invalidating the query by array key
       navigate("/login"); // Navigate to login page after logout

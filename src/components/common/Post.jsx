@@ -15,13 +15,14 @@ const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
 	const {data:authUser}=useQuery({queryKey:['authUser']})
 		const queryClient=useQueryClient()
+		const token = localStorage.getItem("authToken");
 	// console.log(authUser)
 	// console.log("authUser._id ",authUser._id)
 	// console.log("post.user._id ",post.user._id )
 	const{mutate:deletePost,isPending:isDeleting}=useMutation(
 		{
 			mutationFn:async()=>{
-				const res=await axios.delete(`${baseurl}/api/posts/${post._id}`,{withCredentials:true})
+				const res=await axios.delete(`${baseurl}/api/posts/${post._id}`,{withCredentials:true, headers: { Authorization: `Bearer ${token}` },})
 				return res
 			},
 			onSuccess:()=>{
@@ -38,7 +39,7 @@ const Post = ({ post }) => {
 			const res = await axios.post(
 			  `${baseurl}/api/posts/like/${post._id}`,
 			  {},
-			  { withCredentials: true } // Correct placement of `withCredentials`
+			  { withCredentials: true , headers: { Authorization: `Bearer ${token}` },}  // Correct placement of `withCredentials`
 			);
 	  
 			if (!res.data) {
@@ -82,7 +83,7 @@ const Post = ({ post }) => {
 			const res = await axios.post(
 			  `${baseurl}/api/posts/comment/${post._id}`,
 			  { text: comment },
-			  { withCredentials: true }
+			  { withCredentials: true  , headers: { Authorization: `Bearer ${token}` },}
 			);
 	  
 			// Check for a successful response
@@ -197,7 +198,7 @@ const Post = ({ post }) => {
 												<div className='avatar'>
 													<div className='w-8 rounded-full'>
 														<img
-															src={comment.user.profileImg || "/avatar-placeholder.png"}
+															src={comment.user.profileImg || "/profile.jpeg"}
 														/>
 													</div>
 												</div>

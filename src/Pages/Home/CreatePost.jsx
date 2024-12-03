@@ -14,9 +14,14 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 const CreatePost = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
+  const token = localStorage.getItem("authToken"); // Retrieve token
+      if (!token) {
+        throw new Error("No token found in localStorage.");
+      }
   const { data: authUser } = useQuery({
     queryKey: ["authUser"],
   });
+  
   const queryClient = useQueryClient();
   const { mutate: CreatePost, isPending, isError, error } = useMutation({
     mutationFn: async ({ text, img }) => {
@@ -24,7 +29,7 @@ const CreatePost = () => {
         const res = await axios.post(
           `${ baseurl }/api/posts/create`,
           { text, img }, // Send the text and img in the request body
-          { withCredentials: true }
+          { withCredentials: true , headers: { Authorization: `Bearer ${token}` }, }
         );
 	
         return res.data;
@@ -44,7 +49,7 @@ const CreatePost = () => {
   const imgRef = useRef(null);
 
   const data = {
-    profileImg: "/avatars/boy1.png",
+    profileImg: authUser.profileImg,
   };
 
   const handleSubmit = (e) => {
@@ -67,7 +72,7 @@ const CreatePost = () => {
     <div className="flex p-4 items-start gap-4 border-b border-gray-700">
       <div className="avatar">
         <div className="w-8 rounded-full">
-          <img src={data.profileImg || "/avatar-placeholder.png"} />
+          <img src={data.profileImg || "/profile.jpeg" } />
         </div>
       </div>
       <form className="flex flex-col gap-2 w-full" onSubmit={handleSubmit}>

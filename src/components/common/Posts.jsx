@@ -95,12 +95,21 @@ const Posts = ({ feedType, username, userId }) => {
   const { data: posts, isLoading, refetch, error } = useQuery({
     queryKey: ["posts", feedType],
     queryFn: async () => {
-      const res = await axios.get(POST_ENDPOINT, { withCredentials: true });
+      const token = localStorage.getItem("authToken"); // Retrieve token
+      if (!token) {
+        throw new Error("No token found in localStorage.");
+      }
+  
+      const res = await axios.get(POST_ENDPOINT, {
+        withCredentials: true, // Ensures cookies are included
+        headers: { Authorization: `Bearer ${token}` }, // Add Bearer token
+      });
+  
       console.log("API Data:", res.data); // Debug log
-      return  res.data 
+      return res.data;
     },
   });
-
+  
   useEffect(() => {
     refetch();
   }, [feedType,refetch,username]);
